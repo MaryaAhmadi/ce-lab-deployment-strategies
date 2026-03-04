@@ -1,95 +1,168 @@
-# Lab M5.06 - Deployment Strategies
 
-**Cloud Engineering Bootcamp - Week 5, Day 3**  
-**Module:** Cloud Automation & CI/CD
+# Lab M5.06 - Deployment Strategies (Blue/Green)
+ 
+## Architecture
+ 
+Two S3 static website buckets serve as deployment targets:
+- **Blue** — `deploy-lab-blue.s3-website-us-east-1.amazonaws.com`
+- **Green** — `deploy-lab-green.s3-website-us-east-1.amazonaws.com`
+ 
+Only one is "active" at a time, tracked by `deployment.json`.
 
-## Start Here: Fork, Clone, and Submit
 
-You will complete this lab by working in **your own fork** of the lab repository and submitting a **Pull Request (PR)**.
+Start Here: Fork, Clone, and Submit
 
-1. **Fork the lab repository** to your GitHub account.
-2. **Clone your fork** locally:
-   ```bash
-   git clone https://github.com/<your-github-username>/ce-lab-deployment-strategies.git
-   cd ce-lab-deployment-strategies
-   ```
-3. **Follow all instructions below** and save your work in this repo (files, screenshots, and notes).
-4. **When finished, submit your work:**
-   - `git add` → `git commit` → `git push`
-   - Open a **Pull Request** from your fork back to the original lab repo
-   - Copy the **PR URL** and paste it into the **Lab Submission** field in the Student Portal
+Fork the lab repository to your GitHub account.
+
+Clone your fork locally:
+
+git clone https://github.com/MaryaAhmadi/ce-lab-infrastructure-testing.git
+cd ce-lab-infrastructure-testing
+
+Complete the lab instructions, saving all work (files, screenshots, notes) in this repository.
+
+Stage, commit, and push your changes:
+
+git add .
+git commit -m "Complete lab M5.05"
+git push origin main
+
+Open a Pull Request (PR) from your fork to the original lab repository.
+
+Copy the PR URL and submit it in the Lab Submission field on the Student Portal.
 
 ## 📋 Lab Overview
 
-Implement different deployment strategies including blue/green, canary, and rolling deployments to achieve zero-downtime releases.
+This lab focuses on implementing comprehensive testing for infrastructure code, including:
+
+Syntax validation
+
+Linting
+
+Security scanning
+
+Compliance and custom checks
+
+You will build a multi-layer testing strategy for Terraform code to ensure consistency, security, and compliance.
 
 ## 🎯 Learning Objectives
 
-- Implement blue/green deployment strategy
-- Configure canary deployments with traffic splitting
-- Set up rolling update deployments
-- Implement automated rollback procedures
-- Monitor deployment health and metrics
+By the end of this lab, you will be able to:
+
+Implement infrastructure testing frameworks
+
+Configure automated validation in CI/CD pipelines
+
+Run Terraform validation (terraform validate) and linting (tflint)
+
+Perform security scanning using Checkov
+
+Create and run custom validation tests for naming conventions, tagging, and plan verification
 
 ## 📁 Repository Structure
-
-```
-ce-lab-deployment-strategies/
+ce-lab-infrastructure-testing/
 ├── .github/
 │   └── workflows/
-│       ├── blue-green-deploy.yml
-│       ├── canary-deploy.yml
-│       └── rolling-deploy.yml
+│       └── test-infrastructure.yml
 ├── terraform/
-│   ├── blue-green/
-│   ├── canary/
-│   └── rolling/
+│   ├── main.tf
+│   ├── variables.tf
+│   └── outputs.tf
+├── scripts/
+│   ├── validate-conventions.sh
+│   ├── validate-plan.sh
+│   └── install-hooks.sh
+├── tests/
+│   ├── terraform_test.go
+│   └── compliance_test.sh
+├── .tflint.hcl
+├── .pre-commit-config.yaml
 ├── README.md
 └── .gitignore
-```
+
+## Architecture
+
+The deployment uses two S3 static website buckets as targets:
+
+Blue — http://deploy-lab-maryam-ironhack-blue.s3-website-us-east-1.amazonaws.com
+
+Green — http://deploy-lab-maryam-ironhack-green.s3-website-us-east-1.amazonaws.com
+
+At any time, only one environment is active, tracked via deployment.json.
+
+
+## Workflows
+Deploy & Switch (.github/workflows/deploy.yml)
+
+Reads deployment.json to determine the inactive environment.
+
+Deploys new content to the inactive bucket.
+
+Performs a health check (expects HTTP 200).
+
+Switches active_environment in deployment.json.
+
+Commits the updated deployment state back to the repository.
+
+Rollback (.github/workflows/rollback.yml)
+
+Reads deployment.json to identify the currently active environment.
+
+Switches back to the previous environment (no redeployment needed).
+
+Records the rollback reason in the deployment history.
+
+Commits the updated state back to the repository.
+
+
+##Deployment State (deployment.json)
+
+This file serves as the single source of truth, tracking:
+
+Active environment (blue or green)
+
+Current version deployed
+
+Deployer (github.actor)
+
+Timestamp of deployment
+
+Full history of deployments and rollbacks
+
+
+## Key Learnings
+
+Blue/Green deployments eliminate downtime — traffic switches instantly.
+
+The inactive environment is always ready for the next deployment.
+
+Rollback is instant — simply switch the pointer back.
+
+Deployment history provides a full audit trail for traceability.
+
 
 ## ✅ Submission Requirements
 
-1. **Deployment Workflows**
-   - Blue/green deployment automation
-   - Canary deployment with gradual rollout
-   - Rolling update implementation
+Complete the lab as described and save your work in this repository:
 
-2. **Infrastructure Code**
-   - Load balancer configuration
-   - Target group management
-   - Health check configuration
+Testing Workflows
 
-3. **Rollback Procedures**
-   - Automated rollback on failure
-   - Manual rollback capability
+Terraform validation
 
-4. **Documentation**
-   - Strategy comparison
-   - Deployment process documentation
+TFLint configuration and execution
 
-**Reminder:** After pushing your work and opening a PR:
-- Copy the **PR URL**
-- Paste it into the **Lab Submission** field in the Student Portal
+Security scanning with Checkov
 
-## 🎓 Grading Rubric
+Custom compliance tests
 
-| Criteria | Points |
-|----------|--------|
-| **Blue/Green Deployment** | 30 |
-| **Canary Deployment** | 30 |
-| **Rolling Updates** | 25 |
-| **Documentation** | 15 |
-| **Total** | 100 |
+Infrastructure Code
 
-## 💡 Tips
+Working Terraform configuration
 
-- Test deployments with a simple application first
-- Implement health checks before deployment
-- Use CloudWatch metrics for monitoring
-- Practice rollback procedures
+Proper resource configuration
 
-## 📚 Resources
+Test Documentation
 
-- [AWS Deployment Strategies](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/deployment-strategies.html)
-- [GitHub Deployments API](https://docs.github.com/en/rest/deployments)
+Testing strategy explanation
+
+Test coverage documentation
